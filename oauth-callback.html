@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Authentication Complete</title>
+</head>
+<body>
+<script>
+  // This lets ArcGIS finish OAuth flow cleanly
+  window.opener && window.opener.postMessage("arcgis:oauth:success", "*");
+
+  // Close popup or redirect back to main app
+  window.location.href = "./";
+</script>
+
+<p>Signing you in... you can close this window.</p>
+</body>
+</html>
