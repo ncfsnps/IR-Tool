@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH CONFIG (POPUP FLOW)
+  // 🔐 OAUTH (POPUP ONLY - NO REDIRECT FLOW)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -75,7 +75,7 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // Check existing session only (NO auto-login)
+  // ONLY check status — NEVER trigger login automatically
   IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
     .then(() => {
       document.getElementById("status").innerText = "Signed in";
@@ -107,28 +107,25 @@ require([
     zoom: 6
   });
 
-  // -----------------------------
-  // STATUS
-  // -----------------------------
   view.when(() => {
     document.getElementById("status").innerText = "Map loaded";
   });
 
   // -----------------------------
-  // 🔑 LOGIN ONLY ON USER ACTION
+  // 🔑 USER-INITIATED LOGIN ONLY
   // -----------------------------
-  document.getElementById("runBtn").onclick = function() {
-
-    IdentityManager.getCredential(info.portalUrl + "/sharing")
-      .then(() => {
-        document.getElementById("status").innerText = "Signed in (ready)";
-        alert("Login successful");
-      })
-      .catch((err) => {
-        console.log(err);
-        alert("Login cancelled or failed");
+  document.getElementById("runBtn").onclick = async function () {
+    try {
+      await IdentityManager.getCredential(info.portalUrl + "/sharing", {
+        oAuthPopup: true
       });
 
+      document.getElementById("status").innerText = "Signed in successfully";
+      alert("Login successful");
+    } catch (err) {
+      console.log(err);
+      alert("Login failed or cancelled");
+    }
   };
 
 });
