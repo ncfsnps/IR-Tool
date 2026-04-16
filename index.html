@@ -124,9 +124,15 @@ require([
       loadLayer();
 
     } catch (err) {
-      console.error("Auth error:", err);
-      document.getElementById("status").innerText = "Login failed (check console)";
-    }
+  console.error("FULL AUTH ERROR:", err);
+
+  alert(
+    "OAuth failed:\n\n" +
+    (err && err.message ? err.message : JSON.stringify(err))
+  );
+
+  document.getElementById("status").innerText = "Login failed";
+}
   };
 
 });
