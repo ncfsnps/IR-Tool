@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <title>IR Tool</title>
 
-  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css" />
+  <link rel="stylesheet" href="https://js.arcgis.com/4.30/esri/themes/light/main.css">
   <script src="https://js.arcgis.com/4.30/"></script>
 
   <style>
@@ -16,22 +16,108 @@
 
     #panel {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 12px;
+      left: 12px;
+      z-index: 99;
       background: white;
       padding: 10px;
-      z-index: 99;
-      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      width: 260px;
+      font-family: Arial, sans-serif;
+      box-shadow: 0 0 6px rgba(0,0,0,0.2);
+    }
+
+    #status {
+      font-size: 12px;
+      color: #444;
+      margin-top: 8px;
     }
   </style>
 </head>
 
 <body>
-  <div id="panel">
-    <h3>IR Point Tool</h3>
-    <p>App is loading...</p>
-  </div>
 
-  <div id="viewDiv"></div>
+<div id="panel">
+  <h3>IR Tool</h3>
+
+  <input type="file" id="fileInput" />
+  <br><br>
+
+  <button id="runBtn">Run (not active yet)</button>
+
+  <div id="status">Loading map...</div>
+</div>
+
+<div id="viewDiv"></div>
+
+<script>
+require([
+  "esri/Map",
+  "esri/views/MapView",
+  "esri/layers/FeatureLayer",
+  "esri/identity/IdentityManager",
+  "esri/identity/OAuthInfo"
+], function(
+  Map,
+  MapView,
+  FeatureLayer,
+  IdentityManager,
+  OAuthInfo
+) {
+
+  // -----------------------------
+  // 🔐 AGOL LOGIN SETUP (read-only for now)
+  // -----------------------------
+  const info = new OAuthInfo({
+    appId: "YOUR_CLIENT_ID_HERE",  // we will set this next step
+    popup: true
+  });
+
+  IdentityManager.registerOAuthInfos([info]);
+
+  // Try silent sign-in
+  IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
+    .catch(() => IdentityManager.getCredential(info.portalUrl + "/sharing"));
+
+  // -----------------------------
+  // 📍 YOUR IR LAYER
+  // -----------------------------
+  const irLayer = new FeatureLayer({
+    url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
+    outFields: ["*"]
+  });
+
+  // -----------------------------
+  // 🗺 MAP
+  // -----------------------------
+  const map = new Map({
+    basemap: "topo-vector",
+    layers: [irLayer]
+  });
+
+  const view = new MapView({
+    container: "viewDiv",
+    map: map,
+    center: [-79.5, 35.5],
+    zoom: 6
+  });
+
+  // -----------------------------
+  // UI STATUS
+  // -----------------------------
+  view.when(() => {
+    document.getElementById("status").innerText =
+      "Map loaded. Layer connected (read-only).";
+  });
+
+  // -----------------------------
+  // CSV placeholder (we'll wire next step)
+  // -----------------------------
+  document.getElementById("runBtn").onclick = function() {
+    alert("Next step: we will enable editing + CSV upload");
+  };
+
+});
+</script>
+
 </body>
 </html>
