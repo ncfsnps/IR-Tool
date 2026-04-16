@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH CONFIG (SAFE POPUP MODE)
+  // OAUTH CONFIG (POPUP ONLY)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -74,17 +74,6 @@ require([
   });
 
   IdentityManager.registerOAuthInfos([info]);
-
-  // -----------------------------
-  // SESSION CHECK ONLY (NO LOGIN TRIGGERS)
-  // -----------------------------
-  IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
-    .then(() => {
-      document.getElementById("status").innerText = "Signed in";
-    })
-    .catch(() => {
-      document.getElementById("status").innerText = "Not signed in";
-    });
 
   // -----------------------------
   // FEATURE LAYER
@@ -111,17 +100,19 @@ require([
   });
 
   // -----------------------------
-  // LOGIN (ONLY USER-INITIATED)
+  // LOGIN (SINGLE CLEAN FLOW)
   // -----------------------------
-  document.getElementById("runBtn").onclick = function () {
-    IdentityManager.getCredential(info.portalUrl + "/sharing")
-      .then(() => {
-        document.getElementById("status").innerText = "Signed in successfully";
-        alert("Login successful");
-      })
-      .catch(err => {
-        console.log("Login error:", err);
-      });
+  document.getElementById("runBtn").onclick = async function () {
+    try {
+      await IdentityManager.getCredential(info.portalUrl + "/sharing/rest");
+
+      document.getElementById("status").innerText = "Signed in successfully";
+      alert("Login successful");
+
+    } catch (err) {
+      console.log(err);
+      document.getElementById("status").innerText = "Login failed";
+    }
   };
 
 });
