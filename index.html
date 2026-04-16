@@ -65,18 +65,18 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH (YOUR PORTAL FIXED)
+  // 🔐 OAUTH CONFIG
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
-    popup: true,
     portalUrl: "https://ncagr.maps.arcgis.com",
+    popup: true,
     redirectUri: "https://ncfsnps.github.io/IR-Tool/oauth-callback.html"
   });
 
   IdentityManager.registerOAuthInfos([info]);
 
-  let irLayer;
+  let irLayer = null;
 
   // -----------------------------
   // MAP
@@ -97,6 +97,25 @@ require([
   });
 
   // -----------------------------
+  // LOGIN
+  // -----------------------------
+  document.getElementById("runBtn").onclick = async function () {
+    try {
+      document.getElementById("status").innerText = "Signing in...";
+
+      await IdentityManager.getCredential(info.portalUrl + "/sharing");
+
+      document.getElementById("status").innerText = "Signed in successfully";
+
+      loadLayer();
+
+    } catch (err) {
+      console.log(err);
+      document.getElementById("status").innerText = "Login failed";
+    }
+  };
+
+  // -----------------------------
   // LOAD LAYER AFTER LOGIN
   // -----------------------------
   function loadLayer() {
@@ -109,27 +128,6 @@ require([
 
     map.add(irLayer);
   }
-
-  // -----------------------------
-  // LOGIN
-  // -----------------------------
-  document.getElementById("runBtn").onclick = async function () {
-    try {
-      document.getElementById("status").innerText = "Signing in...";
-
-      await IdentityManager.getCredential(
-        "https://ncagr.maps.arcgis.com/sharing/rest"
-      );
-
-      document.getElementById("status").innerText = "Signed in successfully";
-
-      loadLayer();
-
-    } catch (err) {
-      console.log(err);
-      document.getElementById("status").innerText = "Login failed";
-    }
-  };
 
 });
 </script>
