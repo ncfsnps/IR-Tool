@@ -65,21 +65,21 @@ require([
 ) {
 
   // -----------------------------
-  // OAUTH CONFIG (IMPORTANT FIXES)
+  // OAUTH CONFIG (CLEAN + STABLE)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
-    popup: true,
     portalUrl: "https://www.arcgis.com",
-    redirectUri: "https://ncfsnps.github.io/IR-Tool/"
+    popup: true,
+    redirectUri: "https://ncfsnps.github.io/IR-Tool/oauth-callback.html"
   });
 
   IdentityManager.registerOAuthInfos([info]);
 
-  let irLayer = null;
+  let irLayer;
 
   // -----------------------------
-  // MAP (NO SECURED DATA YET)
+  // MAP (NO SECURE LAYER INITIALLY)
   // -----------------------------
   const map = new Map({
     basemap: "topo-vector"
@@ -97,27 +97,7 @@ require([
   });
 
   // -----------------------------
-  // LOGIN BUTTON ONLY
-  // -----------------------------
-  document.getElementById("runBtn").onclick = async function () {
-    try {
-
-      await IdentityManager.getCredential(
-        info.portalUrl + "/sharing/rest"
-      );
-
-      document.getElementById("status").innerText = "Signed in successfully";
-
-      loadLayer();
-
-    } catch (err) {
-      console.log("Login error:", err);
-      document.getElementById("status").innerText = "Login failed";
-    }
-  };
-
-  // -----------------------------
-  // LOAD SECURED LAYER AFTER LOGIN
+  // LOAD LAYER AFTER LOGIN
   // -----------------------------
   function loadLayer() {
     if (irLayer) return;
@@ -129,6 +109,25 @@ require([
 
     map.add(irLayer);
   }
+
+  // -----------------------------
+  // SIGN IN BUTTON
+  // -----------------------------
+  document.getElementById("runBtn").onclick = async function () {
+    try {
+      document.getElementById("status").innerText = "Signing in...";
+
+      await IdentityManager.getCredential(info.portalUrl + "/sharing/rest");
+
+      document.getElementById("status").innerText = "Signed in successfully";
+
+      loadLayer();
+
+    } catch (err) {
+      console.log("Login error:", err);
+      document.getElementById("status").innerText = "Login failed (check ArcGIS app settings)";
+    }
+  };
 
 });
 </script>
