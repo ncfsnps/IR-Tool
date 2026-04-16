@@ -42,7 +42,7 @@
   <input type="file" id="fileInput" />
   <br><br>
 
-  <button id="runBtn">Sign In / Run Tool</button>
+  <button id="runBtn">Sign In</button>
 
   <div id="status">Loading map...</div>
 </div>
@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH CONFIG (ROBUST MODE)
+  // 🔐 OAUTH CONFIG (SAFE POPUP MODE)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -75,12 +75,9 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // Handle possible redirect callback gracefully (prevents broken state)
-  if (window.location.href.includes("oauth-callback")) {
-    console.log("OAuth callback detected — letting ArcGIS handle it.");
-  }
-
-  // Check existing session only
+  // -----------------------------
+  // SESSION CHECK ONLY (NO LOGIN TRIGGERS)
+  // -----------------------------
   IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
     .then(() => {
       document.getElementById("status").innerText = "Signed in";
@@ -90,16 +87,13 @@ require([
     });
 
   // -----------------------------
-  // 📍 FEATURE LAYER
+  // FEATURE LAYER
   // -----------------------------
   const irLayer = new FeatureLayer({
     url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
     outFields: ["*"]
   });
 
-  // -----------------------------
-  // 🗺 MAP
-  // -----------------------------
   const map = new Map({
     basemap: "topo-vector",
     layers: [irLayer]
@@ -117,18 +111,17 @@ require([
   });
 
   // -----------------------------
-  // 🔑 LOGIN (USER INITIATED ONLY)
+  // LOGIN (ONLY USER-INITIATED)
   // -----------------------------
-  document.getElementById("runBtn").onclick = async function () {
-    try {
-      await IdentityManager.getCredential(info.portalUrl + "/sharing");
-
-      document.getElementById("status").innerText = "Signed in successfully";
-      alert("Login successful");
-    } catch (err) {
-      console.log("Login error:", err);
-      alert("Login cancelled or failed");
-    }
+  document.getElementById("runBtn").onclick = function () {
+    IdentityManager.getCredential(info.portalUrl + "/sharing")
+      .then(() => {
+        document.getElementById("status").innerText = "Signed in successfully";
+        alert("Login successful");
+      })
+      .catch(err => {
+        console.log("Login error:", err);
+      });
   };
 
 });
