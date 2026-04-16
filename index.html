@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // OAUTH CONFIG (YOUR PORTAL)
+  // OAUTH CONFIG (NCAGR PORTAL)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -97,13 +97,16 @@ require([
   });
 
   // -----------------------------
-  // FEATURE LAYER (LOADED AFTER LOGIN)
+  // LOAD FEATURE LAYER (NCAGR PORTAL ITEM)
   // -----------------------------
   function loadLayer() {
     if (irLayer) return;
 
     irLayer = new FeatureLayer({
-      url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
+      portalItem: {
+        id: "48431513fe154e43bca0e4c4a4547291"
+      },
+      layerId: 7,
       outFields: ["*"]
     });
 
@@ -111,7 +114,7 @@ require([
   }
 
   // -----------------------------
-  // LOGIN BUTTON
+  // SIGN IN
   // -----------------------------
   document.getElementById("runBtn").onclick = async function () {
     try {
@@ -124,15 +127,9 @@ require([
       loadLayer();
 
     } catch (err) {
-  console.error("FULL AUTH ERROR:", err);
-
-  alert(
-    "OAuth failed:\n\n" +
-    (err && err.message ? err.message : JSON.stringify(err))
-  );
-
-  document.getElementById("status").innerText = "Login failed";
-}
+      console.error(err);
+      document.getElementById("status").innerText = "Login failed (check console)";
+    }
   };
 
 });
