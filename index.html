@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // OAUTH CONFIG (POPUP ONLY)
+  // 🔐 OAUTH CONFIG
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -75,17 +75,13 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // -----------------------------
-  // FEATURE LAYER
-  // -----------------------------
-  const irLayer = new FeatureLayer({
-    url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
-    outFields: ["*"]
-  });
+  let irLayer = null;
 
+  // -----------------------------
+  // MAP (NO SECURED LAYERS YET)
+  // -----------------------------
   const map = new Map({
-    basemap: "topo-vector",
-    layers: [irLayer]
+    basemap: "topo-vector"
   });
 
   const view = new MapView({
@@ -96,21 +92,34 @@ require([
   });
 
   view.when(() => {
-    document.getElementById("status").innerText = "Map loaded";
+    document.getElementById("status").innerText = "Map loaded (not signed in)";
   });
 
   // -----------------------------
-  // LOGIN (SINGLE CLEAN FLOW)
+  // LOGIN BUTTON (ONLY TRIGGERS AUTH)
   // -----------------------------
   document.getElementById("runBtn").onclick = async function () {
     try {
+
+      // Authenticate user
       await IdentityManager.getCredential(info.portalUrl + "/sharing/rest");
 
       document.getElementById("status").innerText = "Signed in successfully";
-      alert("Login successful");
+
+      // -----------------------------
+      // NOW LOAD SECURED LAYER
+      // -----------------------------
+      if (!irLayer) {
+        irLayer = new FeatureLayer({
+          url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
+          outFields: ["*"]
+        });
+
+        map.add(irLayer);
+      }
 
     } catch (err) {
-      console.log(err);
+      console.log("Login error:", err);
       document.getElementById("status").innerText = "Login failed";
     }
   };
