@@ -65,12 +65,12 @@ require([
 ) {
 
   // -----------------------------
-  // OAUTH CONFIG (CLEAN + STABLE)
+  // 🔐 OAUTH (YOUR PORTAL FIXED)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
-    portalUrl: "https://www.arcgis.com",
     popup: true,
+    portalUrl: "https://ncagr.maps.arcgis.com",
     redirectUri: "https://ncfsnps.github.io/IR-Tool/oauth-callback.html"
   });
 
@@ -79,7 +79,7 @@ require([
   let irLayer;
 
   // -----------------------------
-  // MAP (NO SECURE LAYER INITIALLY)
+  // MAP
   // -----------------------------
   const map = new Map({
     basemap: "topo-vector"
@@ -111,21 +111,23 @@ require([
   }
 
   // -----------------------------
-  // SIGN IN BUTTON
+  // LOGIN
   // -----------------------------
   document.getElementById("runBtn").onclick = async function () {
     try {
       document.getElementById("status").innerText = "Signing in...";
 
-      await IdentityManager.getCredential(info.portalUrl + "/sharing/rest");
+      await IdentityManager.getCredential(
+        "https://ncagr.maps.arcgis.com/sharing/rest"
+      );
 
       document.getElementById("status").innerText = "Signed in successfully";
 
       loadLayer();
 
     } catch (err) {
-      console.log("Login error:", err);
-      document.getElementById("status").innerText = "Login failed (check ArcGIS app settings)";
+      console.log(err);
+      document.getElementById("status").innerText = "Login failed";
     }
   };
 
