@@ -44,7 +44,7 @@
 
   <button id="runBtn">Run (not active yet)</button>
 
-  <div id="status">Loading map...</div>
+  <div id="status">Loading...</div>
 </div>
 
 <div id="viewDiv"></div>
@@ -54,38 +54,39 @@ require([
   "esri/Map",
   "esri/views/MapView",
   "esri/layers/FeatureLayer",
-  "esri/identity/IdentityManager",
-  "esri/identity/OAuthInfo"
+  "esri/identity/OAuthInfo",
+  "esri/identity/IdentityManager"
 ], function(
   Map,
   MapView,
   FeatureLayer,
-  IdentityManager,
-  OAuthInfo
+  OAuthInfo,
+  IdentityManager
 ) {
 
   // -----------------------------
-  // 🔐 AGOL LOGIN SETUP (read-only for now)
+  // 🔐 AUTH (CLEAN OAUTH POPUP FLOW)
   // -----------------------------
   const info = new OAuthInfo({
-    appId: "yhi27yU7BRlbw7c9",  // we will set this next step
+    appId: "yhi27yU7BRlbw7c9",
     popup: true
   });
 
   IdentityManager.registerOAuthInfos([info]);
 
- IdentityManager.registerOAuthInfos([info]);
-
-IdentityManager.getCredential(info.portalUrl + "/sharing")
-  .then(() => {
-    console.log("Signed in");
-  })
-  .catch(() => {
-    console.log("Not signed in yet");
-  });
+  // Force login popup (no oauth-callback.html)
+  IdentityManager.getCredential(info.portalUrl + "/sharing")
+    .then(() => {
+      console.log("Signed in");
+      document.getElementById("status").innerText = "Signed in to AGOL";
+    })
+    .catch(() => {
+      console.log("Not signed in yet");
+      document.getElementById("status").innerText = "Not signed in";
+    });
 
   // -----------------------------
-  // 📍 YOUR IR LAYER
+  // 📍 FEATURE LAYER
   // -----------------------------
   const irLayer = new FeatureLayer({
     url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
@@ -108,18 +109,18 @@ IdentityManager.getCredential(info.portalUrl + "/sharing")
   });
 
   // -----------------------------
-  // UI STATUS
+  // STATUS
   // -----------------------------
   view.when(() => {
     document.getElementById("status").innerText =
-      "Map loaded. Layer connected (read-only).";
+      "Map loaded (waiting for login)";
   });
 
   // -----------------------------
-  // CSV placeholder (we'll wire next step)
+  // BUTTON PLACEHOLDER
   // -----------------------------
   document.getElementById("runBtn").onclick = function() {
-    alert("Next step: we will enable editing + CSV upload");
+    alert("Next step: CSV upload + editing");
   };
 
 });
