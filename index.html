@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH (POPUP ONLY - NO REDIRECT FLOW)
+  // 🔐 OAUTH CONFIG (ROBUST MODE)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -75,7 +75,12 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // ONLY check status — NEVER trigger login automatically
+  // Handle possible redirect callback gracefully (prevents broken state)
+  if (window.location.href.includes("oauth-callback")) {
+    console.log("OAuth callback detected — letting ArcGIS handle it.");
+  }
+
+  // Check existing session only
   IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
     .then(() => {
       document.getElementById("status").innerText = "Signed in";
@@ -112,19 +117,17 @@ require([
   });
 
   // -----------------------------
-  // 🔑 USER-INITIATED LOGIN ONLY
+  // 🔑 LOGIN (USER INITIATED ONLY)
   // -----------------------------
   document.getElementById("runBtn").onclick = async function () {
     try {
-      await IdentityManager.getCredential(info.portalUrl + "/sharing", {
-        oAuthPopup: true
-      });
+      await IdentityManager.getCredential(info.portalUrl + "/sharing");
 
       document.getElementById("status").innerText = "Signed in successfully";
       alert("Login successful");
     } catch (err) {
-      console.log(err);
-      alert("Login failed or cancelled");
+      console.log("Login error:", err);
+      alert("Login cancelled or failed");
     }
   };
 
