@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH CONFIG
+  // OAUTH CONFIG (YOUR PORTAL)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -76,7 +76,7 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  let irLayer = null;
+  let irLayer;
 
   // -----------------------------
   // MAP
@@ -97,7 +97,21 @@ require([
   });
 
   // -----------------------------
-  // LOGIN
+  // FEATURE LAYER (LOADED AFTER LOGIN)
+  // -----------------------------
+  function loadLayer() {
+    if (irLayer) return;
+
+    irLayer = new FeatureLayer({
+      url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
+      outFields: ["*"]
+    });
+
+    map.add(irLayer);
+  }
+
+  // -----------------------------
+  // LOGIN BUTTON
   // -----------------------------
   document.getElementById("runBtn").onclick = async function () {
     try {
@@ -110,24 +124,10 @@ require([
       loadLayer();
 
     } catch (err) {
-      console.log(err);
-      document.getElementById("status").innerText = "Login failed";
+      console.error("Auth error:", err);
+      document.getElementById("status").innerText = "Login failed (check console)";
     }
   };
-
-  // -----------------------------
-  // LOAD LAYER AFTER LOGIN
-  // -----------------------------
-  function loadLayer() {
-    if (irLayer) return;
-
-    irLayer = new FeatureLayer({
-      url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
-      outFields: ["*"]
-    });
-
-    map.add(irLayer);
-  }
 
 });
 </script>
