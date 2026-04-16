@@ -42,9 +42,9 @@
   <input type="file" id="fileInput" />
   <br><br>
 
-  <button id="runBtn">Run (not active yet)</button>
+  <button id="runBtn">Sign In / Run Tool</button>
 
-  <div id="status">Loading...</div>
+  <div id="status">Loading map...</div>
 </div>
 
 <div id="viewDiv"></div>
@@ -65,25 +65,23 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 POPUP-ONLY AUTH (NO REDIRECT FLOW)
+  // 🔐 OAUTH CONFIG (POPUP FLOW)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
     popup: true,
-    flowType: "auto"
+    portalUrl: "https://www.arcgis.com"
   });
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // Check login state only (DO NOT force redirect login)
+  // Check existing session only (NO auto-login)
   IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
     .then(() => {
-      document.getElementById("status").innerText = "Signed in to AGOL";
-      console.log("Signed in");
+      document.getElementById("status").innerText = "Signed in";
     })
     .catch(() => {
-      document.getElementById("status").innerText = "Not signed in (click login when needed)";
-      console.log("Not signed in");
+      document.getElementById("status").innerText = "Not signed in";
     });
 
   // -----------------------------
@@ -117,10 +115,20 @@ require([
   });
 
   // -----------------------------
-  // BUTTON PLACEHOLDER
+  // 🔑 LOGIN ONLY ON USER ACTION
   // -----------------------------
   document.getElementById("runBtn").onclick = function() {
-    alert("Next step: enable CSV upload + editing");
+
+    IdentityManager.getCredential(info.portalUrl + "/sharing")
+      .then(() => {
+        document.getElementById("status").innerText = "Signed in (ready)";
+        alert("Login successful");
+      })
+      .catch((err) => {
+        console.log(err);
+        alert("Login cancelled or failed");
+      });
+
   };
 
 });
