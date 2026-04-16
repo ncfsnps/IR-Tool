@@ -65,7 +65,7 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 OAUTH CONFIG
+  // OAUTH CONFIG
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
@@ -78,7 +78,7 @@ require([
   let irLayer = null;
 
   // -----------------------------
-  // MAP (NO SECURED LAYERS YET)
+  // MAP (NO SECURED LAYER INITIALLY)
   // -----------------------------
   const map = new Map({
     basemap: "topo-vector"
@@ -92,37 +92,49 @@ require([
   });
 
   view.when(() => {
-    document.getElementById("status").innerText = "Map loaded (not signed in)";
+    document.getElementById("status").innerText = "Map loaded";
   });
 
   // -----------------------------
-  // LOGIN BUTTON (ONLY TRIGGERS AUTH)
+  // AUTO CHECK SESSION (NO LOGIN TRIGGER)
   // -----------------------------
-  document.getElementById("runBtn").onclick = async function () {
-    try {
+  IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
+    .then(() => {
+      document.getElementById("status").innerText = "Signed in";
+      loadLayer();
+    })
+    .catch(() => {
+      document.getElementById("status").innerText = "Not signed in";
+    });
 
-      // Authenticate user
-      await IdentityManager.getCredential(info.portalUrl + "/sharing/rest");
-
-      document.getElementById("status").innerText = "Signed in successfully";
-
-      // -----------------------------
-      // NOW LOAD SECURED LAYER
-      // -----------------------------
-      if (!irLayer) {
-        irLayer = new FeatureLayer({
-          url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
-          outFields: ["*"]
-        });
-
-        map.add(irLayer);
-      }
-
-    } catch (err) {
-      console.log("Login error:", err);
-      document.getElementById("status").innerText = "Login failed";
-    }
+  // -----------------------------
+  // LOGIN BUTTON (CORRECT FLOW)
+  // -----------------------------
+  document.getElementById("runBtn").onclick = function () {
+    IdentityManager.getCredential(info.portalUrl + "/sharing")
+      .then(() => {
+        document.getElementById("status").innerText = "Signed in successfully";
+        loadLayer();
+      })
+      .catch(err => {
+        console.log(err);
+        document.getElementById("status").innerText = "Login failed";
+      });
   };
+
+  // -----------------------------
+  // LOAD FEATURE LAYER AFTER AUTH
+  // -----------------------------
+  function loadLayer() {
+    if (irLayer) return;
+
+    irLayer = new FeatureLayer({
+      url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
+      outFields: ["*"]
+    });
+
+    map.add(irLayer);
+  }
 
 });
 </script>
