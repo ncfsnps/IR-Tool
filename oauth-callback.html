@@ -2,23 +2,18 @@
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>Authentication complete</title>
+  <title>Sign-in complete</title>
 </head>
 
 <body>
 <script>
-  // This completes ArcGIS OAuth handshake
-  if (window.opener && window.opener.require) {
-    window.opener.require([
-      "esri/identity/IdentityManager"
-    ], function(IdentityManager) {
-      IdentityManager.completeOAuthSignIn();
-    });
-  }
+  // IMPORTANT:
+  // Do NOT manually complete OAuth here.
+  // ArcGIS JS API handles this automatically.
 
   window.close();
 </script>
 
-<p>Completing sign-in...</p>
+<p>Sign-in complete. You can close this window.</p>
 </body>
 </html>
