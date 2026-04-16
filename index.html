@@ -44,7 +44,7 @@
 
   <button id="runBtn">Run (not active yet)</button>
 
-  <div id="status">Loading map...</div>
+  <div id="status">Loading...</div>
 </div>
 
 <div id="viewDiv"></div>
@@ -65,28 +65,29 @@ require([
 ) {
 
   // -----------------------------
-  // 🔐 AUTH (POPUP ONLY - NO CALLBACK FILE)
+  // 🔐 POPUP-ONLY AUTH (NO REDIRECT FLOW)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
-    popup: true
+    popup: true,
+    flowType: "auto"
   });
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // Only check status (DO NOT force redirect login)
+  // Check login state only (DO NOT force redirect login)
   IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
     .then(() => {
-      console.log("Signed in");
       document.getElementById("status").innerText = "Signed in to AGOL";
+      console.log("Signed in");
     })
     .catch(() => {
+      document.getElementById("status").innerText = "Not signed in (click login when needed)";
       console.log("Not signed in");
-      document.getElementById("status").innerText = "Not signed in (sign-in will appear when needed)";
     });
 
   // -----------------------------
-  // 📍 IR FEATURE LAYER
+  // 📍 FEATURE LAYER
   // -----------------------------
   const irLayer = new FeatureLayer({
     url: "https://services6.arcgis.com/3Sj1fiIDvQtFfbvg/arcgis/rest/services/2026_NCFS_IA/FeatureServer/7",
@@ -112,15 +113,14 @@ require([
   // STATUS
   // -----------------------------
   view.when(() => {
-    document.getElementById("status").innerText =
-      "Map loaded";
+    document.getElementById("status").innerText = "Map loaded";
   });
 
   // -----------------------------
-  // BUTTON (placeholder)
+  // BUTTON PLACEHOLDER
   // -----------------------------
   document.getElementById("runBtn").onclick = function() {
-    alert("Next step: CSV upload + editing tools");
+    alert("Next step: enable CSV upload + editing");
   };
 
 });
