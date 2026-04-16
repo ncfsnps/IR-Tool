@@ -74,9 +74,15 @@ require([
 
   IdentityManager.registerOAuthInfos([info]);
 
-  // Try silent sign-in
-  IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
-    .catch(() => IdentityManager.getCredential(info.portalUrl + "/sharing"));
+ IdentityManager.registerOAuthInfos([info]);
+
+IdentityManager.getCredential(info.portalUrl + "/sharing")
+  .then(() => {
+    console.log("Signed in");
+  })
+  .catch(() => {
+    console.log("Not signed in yet");
+  });
 
   // -----------------------------
   // 📍 YOUR IR LAYER
