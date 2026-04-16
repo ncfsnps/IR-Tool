@@ -65,12 +65,13 @@ require([
 ) {
 
   // -----------------------------
-  // OAUTH CONFIG
+  // OAUTH CONFIG (IMPORTANT FIXES)
   // -----------------------------
   const info = new OAuthInfo({
     appId: "yhi27yU7BRlbw7c9",
     popup: true,
-    portalUrl: "https://www.arcgis.com"
+    portalUrl: "https://www.arcgis.com",
+    redirectUri: "https://ncfsnps.github.io/IR-Tool/"
   });
 
   IdentityManager.registerOAuthInfos([info]);
@@ -78,7 +79,7 @@ require([
   let irLayer = null;
 
   // -----------------------------
-  // MAP (NO SECURED LAYER INITIALLY)
+  // MAP (NO SECURED DATA YET)
   // -----------------------------
   const map = new Map({
     basemap: "topo-vector"
@@ -96,34 +97,27 @@ require([
   });
 
   // -----------------------------
-  // AUTO CHECK SESSION (NO LOGIN TRIGGER)
+  // LOGIN BUTTON ONLY
   // -----------------------------
-  IdentityManager.checkSignInStatus(info.portalUrl + "/sharing")
-    .then(() => {
-      document.getElementById("status").innerText = "Signed in";
-      loadLayer();
-    })
-    .catch(() => {
-      document.getElementById("status").innerText = "Not signed in";
-    });
+  document.getElementById("runBtn").onclick = async function () {
+    try {
 
-  // -----------------------------
-  // LOGIN BUTTON (CORRECT FLOW)
-  // -----------------------------
-  document.getElementById("runBtn").onclick = function () {
-    IdentityManager.getCredential(info.portalUrl + "/sharing")
-      .then(() => {
-        document.getElementById("status").innerText = "Signed in successfully";
-        loadLayer();
-      })
-      .catch(err => {
-        console.log(err);
-        document.getElementById("status").innerText = "Login failed";
-      });
+      await IdentityManager.getCredential(
+        info.portalUrl + "/sharing/rest"
+      );
+
+      document.getElementById("status").innerText = "Signed in successfully";
+
+      loadLayer();
+
+    } catch (err) {
+      console.log("Login error:", err);
+      document.getElementById("status").innerText = "Login failed";
+    }
   };
 
   // -----------------------------
-  // LOAD FEATURE LAYER AFTER AUTH
+  // LOAD SECURED LAYER AFTER LOGIN
   // -----------------------------
   function loadLayer() {
     if (irLayer) return;
